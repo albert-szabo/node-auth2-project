@@ -1,4 +1,5 @@
 const { JWT_SECRET } = require("../secrets"); // use this secret!
+const Users = require('../users/users-model');
 
 /*
   If the user does not provide a token in the Authorization header:
@@ -43,8 +44,18 @@ const only = role_name => (request, response, next) => {
   }
 */
 
-const checkUsernameExists = (request, response, next) => {
-
+const checkUsernameExists = async (request, response, next) => {
+  try {
+    const [user] = await Users.findBy({ username: request.body.username });
+    if (!user) {
+      next({ status: 401, message: 'Invalid credentials' });
+    } else {
+      request.user = user;
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
 }
 
 /*
