@@ -45,7 +45,11 @@ const restricted = (request, response, next) => {
 */
 
 const only = role_name => (request, response, next) => {
-
+  if (role_name === request.decodedToken.role_name) {
+    next();
+  } else {
+    next({ status: 403, message: 'This is not for you' });
+  }
 }
 
 /*
