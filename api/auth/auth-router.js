@@ -49,7 +49,28 @@ router.post("/register", validateRoleName, (request, response, next) => {
 */
 
 router.post("/login", checkUsernameExists, (request, response, next) => {
-
+  const passwordMatch = bcrypt.compareSync(request.body.password, request.user.password);
+  if (passwordMatch) {
+    const token = createToken(request.user);
+    response.json({
+      message: `${request.user.username} is back!`,
+      token
+    })
+  } else {
+    next({ status: 401, message: 'Invalid credentials' });
+  }
 });
+
+function createToken(user) {
+  const payload = {
+    subject: user.user_id,
+    username: user.username,
+    role_name: user.role_name
+  };
+  const options = {
+    expiresIn: '1d'
+  };
+  return jwt.sign(payload, JWT_SECRET, options);
+}
 
 module.exports = router;
